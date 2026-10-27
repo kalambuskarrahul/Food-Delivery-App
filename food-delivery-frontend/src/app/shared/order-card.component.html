@@ -1,0 +1,31 @@
+<div class="card order-card">
+  <div class="order-head">
+    <div>
+      <a class="order-number" [routerLink]="['/orders', order.id]">#{{ order.orderNumber }}</a>
+      <div class="muted small">{{ order.placedAt | date: 'medium' }}</div>
+    </div>
+    <app-status [value]="order.status" />
+  </div>
+
+  <div class="order-body">
+    <div><strong>{{ order.restaurantName }}</strong></div>
+    <div class="muted small">{{ summary() }}</div>
+    @if (showCustomer) {
+      <div class="small">👤 {{ order.customerName }} @if (order.customerPhone) { · {{ order.customerPhone }} }</div>
+      <div class="small">📍 {{ order.deliveryAddress }}</div>
+    }
+    @if (order.deliveryPartnerName) {
+      <div class="small">🛵 Rider: {{ order.deliveryPartnerName }}</div>
+    }
+  </div>
+
+  <div class="order-foot">
+    <div>
+      <strong>{{ order.total | currency: 'INR' }}</strong>
+      <span class="muted small"> · {{ order.paymentMethod }} ({{ order.paymentStatus }})</span>
+    </div>
+    <div class="actions">
+      <ng-content />
+    </div>
+  </div>
+</div>

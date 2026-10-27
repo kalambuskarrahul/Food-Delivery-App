@@ -1,0 +1,41 @@
+<div class="row-between wrap">
+  <h1>Delivery dashboard</h1>
+  <button class="btn" [class.btn-primary]="!online()" [class.btn-danger]="online()" (click)="toggleOnline()">
+    {{ online() ? 'Go offline' : 'Go online' }}
+  </button>
+</div>
+<p class="muted">
+  Status: <strong [class.success-text]="online()">{{ online() ? 'Online' : 'Offline' }}</strong>
+  @if (!online()) { · go online to accept deliveries }
+</p>
+
+<div class="tabs">
+  <button class="tab" [class.active]="tab() === 'available'" (click)="tab.set('available')">Available orders ({{ available().length }})</button>
+  <button class="tab" [class.active]="tab() === 'mine'" (click)="tab.set('mine')">My deliveries ({{ mine().length }})</button>
+</div>
+
+@if (tab() === 'available') {
+  @if (available().length === 0) {
+    <div class="card empty">No orders are waiting for pickup right now. This list refreshes automatically.</div>
+  }
+  @for (o of available(); track o.id) {
+    <app-order-card [order]="o" [showCustomer]="true">
+      <div class="small muted">Pickup: {{ o.restaurantAddress }}</div>
+      <button class="btn btn-primary btn-sm" [disabled]="!online()" (click)="claim(o)">Accept delivery</button>
+    </app-order-card>
+  }
+} @else {
+  @if (mine().length === 0) {
+    <div class="card empty">You have no deliveries yet.</div>
+  }
+  @for (o of mine(); track o.id) {
+    <app-order-card [order]="o" [showCustomer]="true">
+      @if (o.status === 'READY_FOR_PICKUP') {
+        <div class="small muted">Pickup: {{ o.restaurantAddress }}</div>
+        <button class="btn btn-primary btn-sm" (click)="setStatus(o, 'OUT_FOR_DELIVERY')">Picked up - start delivery</button>
+      } @else if (o.status === 'OUT_FOR_DELIVERY') {
+        <button class="btn btn-primary btn-sm" (click)="setStatus(o, 'DELIVERED')">Mark as delivered</button>
+      }
+    </app-order-card>
+  }
+}

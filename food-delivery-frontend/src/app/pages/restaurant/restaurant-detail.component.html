@@ -1,0 +1,84 @@
+@if (restaurant(); as r) {
+  <section class="detail-head">
+    <div class="detail-emoji">{{ emoji(r.cuisine) }}</div>
+    <div>
+      <h1>{{ r.name }}</h1>
+      <div class="muted">{{ r.cuisine }} · {{ r.address }}, {{ r.city }}</div>
+      <p>{{ r.description }}</p>
+      <div class="chips">
+        @if (r.avgRating > 0) {
+          <span class="rating">★ {{ r.avgRating }}</span>
+        }
+        <span class="badge" [class.b-delivered]="r.open" [class.b-cancelled]="!r.open">{{ r.open ? 'Open now' : 'Closed' }}</span>
+        @if (r.phone) {
+          <span class="muted small">📞 {{ r.phone }}</span>
+        }
+      </div>
+    </div>
+  </section>
+
+  <h2>Menu</h2>
+  @if (menu(); as m) {
+    @if (m.sections.length === 0) {
+      <div class="card empty">This restaurant has not added any dishes yet.</div>
+    }
+    @for (s of m.sections; track s.name) {
+      <h3 class="section-title">{{ s.name }}</h3>
+      <div class="card menu-list">
+        @for (it of s.items; track it.id) {
+          <div class="menu-item" [class.unavailable]="!it.available">
+            <div class="menu-info">
+              <span class="veg-dot" [class.nonveg]="!it.veg" [title]="it.veg ? 'Vegetarian' : 'Non-vegetarian'"></span>
+              <div>
+                <strong>{{ it.name }}</strong>
+                <div class="muted small">{{ it.description }}</div>
+                <div class="price">{{ it.price | currency: 'INR' }}</div>
+              </div>
+            </div>
+            <div>
+              @if (!it.available) {
+                <span class="muted small">Unavailable</span>
+              } @else if (cart.qty(it.id) > 0) {
+                <div class="stepper">
+                  <button (click)="dec(it)">−</button>
+                  <span>{{ cart.qty(it.id) }}</span>
+                  <button (click)="inc(it)">+</button>
+                </div>
+              } @else {
+                <button class="btn btn-primary btn-sm" [disabled]="!m.open" (click)="inc(it)">Add</button>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    }
+  } @else {
+    <p class="muted">Loading menu...</p>
+  }
+
+  <h2>Reviews</h2>
+  @if (reviews().length === 0) {
+    <p class="muted">No reviews yet. Order and be the first to review!</p>
+  }
+  @for (rv of reviews(); track rv.id) {
+    <div class="card review">
+      <div class="row-between">
+        <strong>{{ rv.customerName }}</strong>
+        <span class="muted small">{{ rv.createdAt | date: 'mediumDate' }}</span>
+      </div>
+      <div class="stars">{{ stars(rv.rating) }}</div>
+      @if (rv.comment) {
+        <p>{{ rv.comment }}</p>
+      }
+    </div>
+  }
+
+  @if (auth.role() === 'CUSTOMER' && cart.count() > 0 && cart.cart().restaurantId === r.id) {
+    <div class="cart-bar">
+      <span>{{ cart.count() }} item(s) · {{ cart.cart().subtotal | currency: 'INR' }}</span>
+      <a class="btn btn-primary btn-sm" routerLink="/cart">View cart</a>
+    </div>
+  }
+} @else if (loading()) {
+  <p class="muted center">Loading...</p>
+}

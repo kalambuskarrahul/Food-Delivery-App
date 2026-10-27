@@ -1,0 +1,62 @@
+<div class="row-between wrap">
+  <h1>My restaurants</h1>
+  <button class="btn btn-primary" (click)="newRestaurant()">+ Add restaurant</button>
+</div>
+
+@if (showForm) {
+  <div class="card">
+    <h3>{{ editingId === null ? 'New restaurant' : 'Edit restaurant' }}</h3>
+    <div class="grid grid-2">
+      <div class="field"><label for="r-name">Name *</label><input id="r-name" [(ngModel)]="form.name"></div>
+      <div class="field">
+        <label for="r-cuisine">Cuisine</label>
+        <select id="r-cuisine" [(ngModel)]="form.cuisine">
+          <option value="">Select cuisine</option>
+          @for (c of cuisines; track c) {
+            <option [value]="c">{{ c }}</option>
+          }
+        </select>
+      </div>
+    </div>
+    <div class="field"><label for="r-desc">Description</label><textarea id="r-desc" rows="2" [(ngModel)]="form.description"></textarea></div>
+    <div class="field"><label for="r-address">Address *</label><input id="r-address" [(ngModel)]="form.address"></div>
+    <div class="grid grid-3">
+      <div class="field"><label for="r-city">City *</label><input id="r-city" [(ngModel)]="form.city"></div>
+      <div class="field"><label for="r-pin">Pincode</label><input id="r-pin" [(ngModel)]="form.pincode"></div>
+      <div class="field"><label for="r-phone">Phone</label><input id="r-phone" [(ngModel)]="form.phone" placeholder="9876543210"></div>
+    </div>
+    <div class="field"><label for="r-img">Image URL (optional)</label><input id="r-img" [(ngModel)]="form.imageUrl" placeholder="https://..."></div>
+    <button class="btn btn-primary btn-sm" (click)="save()">Save</button>
+    <button class="btn btn-outline btn-sm" (click)="cancel()">Cancel</button>
+  </div>
+}
+
+@if (loading()) {
+  <p class="muted center">Loading...</p>
+} @else if (restaurants().length === 0) {
+  <div class="card empty">You have no restaurants yet. Click "Add restaurant" to create one.</div>
+}
+
+@for (r of restaurants(); track r.id) {
+  <div class="card">
+    <div class="row-between wrap">
+      <div>
+        <h3>{{ r.name }} <app-status [value]="r.status" /></h3>
+        <div class="muted small">{{ r.cuisine }} · {{ r.address }}, {{ r.city }}</div>
+        @if (r.status === 'PENDING') {
+          <div class="small warn-text">Waiting for admin approval. Customers cannot see it yet.</div>
+        }
+        @if (r.status === 'SUSPENDED') {
+          <div class="small error-text">This restaurant was suspended by the admin.</div>
+        }
+      </div>
+      <div class="actions">
+        <button class="btn btn-sm" [class.btn-primary]="r.open" [class.btn-outline]="!r.open" (click)="toggleOpen(r)">
+          {{ r.open ? 'Open (click to close)' : 'Closed (click to open)' }}
+        </button>
+        <button class="btn btn-outline btn-sm" (click)="edit(r)">Edit</button>
+        <a class="btn btn-primary btn-sm" [routerLink]="['/owner/restaurants', r.id, 'menu']">Manage menu</a>
+      </div>
+    </div>
+  </div>
+}

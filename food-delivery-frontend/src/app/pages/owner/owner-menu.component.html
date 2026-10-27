@@ -1,0 +1,84 @@
+<a class="back-link" routerLink="/owner/restaurants">← My restaurants</a>
+
+@if (menu(); as m) {
+  <div class="row-between wrap">
+    <h1>Menu · {{ m.restaurantName }}</h1>
+    <button class="btn btn-primary" (click)="newItem()">+ Add dish</button>
+  </div>
+
+  <div class="card">
+    <div class="inline-form">
+      <input [(ngModel)]="newCategory" placeholder="New category (e.g. Starters)" (keyup.enter)="addCategory()">
+      <button class="btn btn-outline btn-sm" (click)="addCategory()">Add category</button>
+    </div>
+  </div>
+
+  @if (showItemForm) {
+    <div class="card">
+      <h3>{{ editingItemId === null ? 'New dish' : 'Edit dish' }}</h3>
+      <div class="grid grid-2">
+        <div class="field"><label for="i-name">Name *</label><input id="i-name" [(ngModel)]="form.name"></div>
+        <div class="field"><label for="i-price">Price (₹) *</label><input id="i-price" type="number" min="0" step="0.5" [(ngModel)]="form.price"></div>
+      </div>
+      <div class="field"><label for="i-desc">Description</label><input id="i-desc" [(ngModel)]="form.description"></div>
+      <div class="grid grid-2">
+        <div class="field">
+          <label for="i-cat">Category</label>
+          <select id="i-cat" [(ngModel)]="form.categoryId">
+            <option [ngValue]="null">No category</option>
+            @for (c of categories(); track c.categoryId) {
+              <option [ngValue]="c.categoryId">{{ c.name }}</option>
+            }
+          </select>
+        </div>
+        <div class="field"><label for="i-img">Image URL (optional)</label><input id="i-img" [(ngModel)]="form.imageUrl"></div>
+      </div>
+      <label class="check"><input type="checkbox" [(ngModel)]="form.veg"> Vegetarian</label>
+      <label class="check"><input type="checkbox" [(ngModel)]="form.available"> Available for ordering</label>
+      <div>
+        <button class="btn btn-primary btn-sm" (click)="saveItem()">Save dish</button>
+        <button class="btn btn-outline btn-sm" (click)="cancelItem()">Cancel</button>
+      </div>
+    </div>
+  }
+
+  @if (m.sections.length === 0) {
+    <div class="card empty">No dishes yet. Add a category and then your first dish.</div>
+  }
+
+  @for (s of m.sections; track s.name) {
+    <div class="row-between section-title">
+      <h3>{{ s.name }}</h3>
+      @if (s.categoryId !== null) {
+        <div class="actions">
+          <button class="btn btn-outline btn-sm" (click)="newItem(s.categoryId)">+ Dish</button>
+          <button class="btn btn-outline btn-sm" (click)="deleteCategory(s)">Delete category</button>
+        </div>
+      }
+    </div>
+    <div class="card menu-list">
+      @if (s.items.length === 0) {
+        <div class="muted small">No dishes in this category.</div>
+      }
+      @for (it of s.items; track it.id) {
+        <div class="menu-item" [class.unavailable]="!it.available">
+          <div class="menu-info">
+            <span class="veg-dot" [class.nonveg]="!it.veg"></span>
+            <div>
+              <strong>{{ it.name }}</strong>
+              <div class="muted small">{{ it.description }}</div>
+              <div class="price">{{ it.price | currency: 'INR' }}</div>
+            </div>
+          </div>
+          <div class="actions">
+            <button class="btn btn-outline btn-sm" (click)="toggleAvailability(it)">{{ it.available ? 'Mark unavailable' : 'Mark available' }}</button>
+            <button class="btn btn-outline btn-sm" (click)="editItem(it)">Edit</button>
+            <button class="btn btn-danger btn-sm" (click)="deleteItem(it)">Delete</button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+} @else {
+  <p class="muted center">Loading menu...</p>
+}

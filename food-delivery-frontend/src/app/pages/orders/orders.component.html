@@ -1,0 +1,24 @@
+<h1>My orders</h1>
+
+@if (loading()) {
+  <p class="muted center">Loading your orders...</p>
+} @else if (result(); as res) {
+  @if (res.content.length === 0) {
+    <div class="card empty">
+      <p>You have not placed any orders yet.</p>
+      <a class="btn btn-primary" routerLink="/">Order something tasty</a>
+    </div>
+  }
+  @for (o of res.content; track o.id) {
+    <app-order-card [order]="o">
+      <a class="btn btn-outline btn-sm" [routerLink]="['/orders', o.id]">Track / details</a>
+    </app-order-card>
+  }
+  @if (res.totalPages > 1) {
+    <div class="pagination">
+      @for (p of pages(); track p) {
+        <button class="btn btn-sm" [class.btn-primary]="p === res.page" [class.btn-outline]="p !== res.page" (click)="load(p)">{{ p + 1 }}</button>
+      }
+    </div>
+  }
+}

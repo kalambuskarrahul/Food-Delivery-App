@@ -1,0 +1,40 @@
+# Configured for XAMPP MariaDB on port 3307. Tables are created manually (database/schema.sql); Hibernate never changes them.
+server:
+  port: 8080
+
+spring:
+  application:
+    name: food-delivery-backend
+  datasource:
+    url: jdbc:mariadb://localhost:3307/food_delivery
+    driver-class-name: org.mariadb.jdbc.Driver
+    username: ${DB_USERNAME:root}            # XAMPP default; set DB_USERNAME to use another user
+    password: ${DB_PASSWORD:}            # XAMPP root has no password; set DB_PASSWORD if yours has one
+  jpa:
+    hibernate:
+      ddl-auto: none            # tables are managed by you in the database, Hibernate never changes them
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+    show-sql: false
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:food-express-dev-secret-key-change-me-0123456789}   # dev default; set JWT_SECRET in production
+    access-token-minutes: 60
+    refresh-token-days: 7
+  cors:
+    allowed-origins: http://localhost:4200
+  admin:
+    email: ${ADMIN_EMAIL:admin@fooddelivery.com}
+    password: ${ADMIN_PASSWORD:Admin@12345}   # development default, change it via ADMIN_PASSWORD
+  order:
+    delivery-fee: 40.00           # charged when the subtotal is below free-delivery-above
+    free-delivery-above: 500.00
+    tax-percent: 5
+  seed-demo-data: true            # creates demo users, restaurants and menus on the first start
+
+logging:
+  level:
+    com.fooddelivery: INFO

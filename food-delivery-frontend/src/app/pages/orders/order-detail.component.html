@@ -1,0 +1,95 @@
+<a class="back-link" [routerLink]="backLink()">← Back</a>
+
+@if (order(); as o) {
+  <div class="row-between wrap">
+    <div>
+      <h1>Order #{{ o.orderNumber }}</h1>
+      <div class="muted">{{ o.restaurantName }} · placed {{ o.placedAt | date: 'medium' }}</div>
+    </div>
+    <app-status [value]="o.status" />
+  </div>
+
+  @if (o.status === 'CANCELLED' || o.status === 'REJECTED') {
+    <div class="card alert-danger">
+      This order was {{ label(o.status).toLowerCase() }}.
+      @if (o.cancelReason) { Reason: {{ o.cancelReason }} }
+      @if (o.paymentStatus === 'REFUNDED') { <br>Your payment has been refunded. }
+    </div>
+  } @else {
+    <div class="card">
+      <div class="tracker">
+        @for (s of steps; track s; let i = $index) {
+          <div class="track-step" [class.done]="i <= currentStep()" [class.current]="i === currentStep()">
+            <div class="dot">{{ currentStep() > i ? '✓' : i + 1 }}</div>
+            <div class="track-label">{{ label(s) }}</div>
+            <div class="track-time muted small">
+              @if (timeOf(s); as t) { {{ t | date: 'shortTime' }} }
+            </div>
+          </div>
+        }
+      </div>
+      @if (o.status !== 'DELIVERED') {
+        <p class="muted small center">This page refreshes automatically every 10 seconds.</p>
+      }
+    </div>
+  }
+
+  <div class="two-col">
+    <div class="card">
+      <h3>Items</h3>
+      @for (i of o.items; track $index) {
+        <div class="row-between">
+          <span>{{ i.quantity }} × {{ i.name }}</span>
+          <span>{{ i.lineTotal | currency: 'INR' }}</span>
+        </div>
+      }
+      <hr>
+      <div class="row-between"><span>Subtotal</span><span>{{ o.subtotal | currency: 'INR' }}</span></div>
+      <div class="row-between"><span>Delivery fee</span><span>{{ o.deliveryFee | currency: 'INR' }}</span></div>
+      <div class="row-between"><span>Tax</span><span>{{ o.tax | currency: 'INR' }}</span></div>
+      <div class="row-between total"><span>Total</span><span>{{ o.total | currency: 'INR' }}</span></div>
+    </div>
+
+    <div class="card">
+      <h3>Delivery &amp; payment</h3>
+      <p><strong>Deliver to:</strong><br>{{ o.customerName }} @if (o.customerPhone) { · {{ o.customerPhone }} }<br>{{ o.deliveryAddress }}</p>
+      <p><strong>Pickup from:</strong><br>{{ o.restaurantName }}, {{ o.restaurantAddress }}</p>
+      @if (o.deliveryPartnerName) {
+        <p><strong>Delivery partner:</strong> {{ o.deliveryPartnerName }}</p>
+      }
+      <p><strong>Payment:</strong> {{ o.paymentMethod }} · <app-status [value]="o.paymentStatus ?? ''" /></p>
+
+      @if (auth.role() === 'CUSTOMER' && o.status === 'PLACED') {
+        <button class="btn btn-danger btn-sm" (click)="cancel()">Cancel order</button>
+        <p class="muted small">You can cancel until the restaurant accepts your order.</p>
+      }
+    </div>
+  </div>
+
+  @if (auth.role() === 'CUSTOMER' && o.status === 'DELIVERED') {
+    <div class="card">
+      <h3>Rate your order</h3>
+      @if (reviewed()) {
+        <p class="success-text">Thank you! Your review has been recorded.</p>
+      } @else {
+        <div class="field">
+          <label for="rating">Rating</label>
+          <select id="rating" [(ngModel)]="rating">
+            <option [ngValue]="5">★★★★★ Excellent</option>
+            <option [ngValue]="4">★★★★ Good</option>
+            <option [ngValue]="3">★★★ Okay</option>
+            <option [ngValue]="2">★★ Poor</option>
+            <option [ngValue]="1">★ Terrible</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="comment">Comment (optional)</label>
+          <textarea id="comment" rows="3" [(ngModel)]="comment" placeholder="How was the food and delivery?"></textarea>
+        </div>
+        <button class="btn btn-primary btn-sm" (click)="submitReview()">Submit review</button>
+      }
+    </div>
+  }
+} @else {
+  <p class="muted center">Loading order...</p>
+}

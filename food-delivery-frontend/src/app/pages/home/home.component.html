@@ -1,0 +1,67 @@
+<section class="hero">
+  <h1>Hungry? Get food delivered fast.</h1>
+  <p>Order from the best restaurants near you.</p>
+  <div class="search-bar">
+    <input [(ngModel)]="q" placeholder="Search restaurants..." (keyup.enter)="search()">
+    <input [(ngModel)]="city" placeholder="City (e.g. Mumbai)" (keyup.enter)="search()">
+    <button class="btn btn-primary" (click)="search()">Search</button>
+  </div>
+</section>
+
+<div class="filters">
+  <select [(ngModel)]="cuisine" (ngModelChange)="search()">
+    <option value="">All cuisines</option>
+    @for (c of cuisines; track c) {
+      <option [value]="c">{{ c }}</option>
+    }
+  </select>
+  <select [(ngModel)]="sort" (ngModelChange)="search()">
+    <option value="newest">Newest</option>
+    <option value="rating">Top rated</option>
+    <option value="name">Name A-Z</option>
+  </select>
+  <button class="btn btn-outline btn-sm" (click)="clear()">Clear filters</button>
+</div>
+
+@if (loading()) {
+  <p class="muted center">Loading restaurants...</p>
+} @else if (result(); as res) {
+  @if (res.content.length === 0) {
+    <div class="card empty">No restaurants found. Try a different search.</div>
+  } @else {
+    <div class="grid grid-3">
+      @for (r of res.content; track r.id) {
+        <a class="card restaurant-card" [routerLink]="['/restaurants', r.id]">
+          <div class="banner">
+            @if (r.imageUrl) {
+              <img [src]="r.imageUrl" [alt]="r.name">
+            } @else {
+              <span class="emoji">{{ emoji(r.cuisine) }}</span>
+            }
+            @if (!r.open) {
+              <span class="closed-tag">Closed</span>
+            }
+          </div>
+          <div class="card-body">
+            <div class="row-between">
+              <h3>{{ r.name }}</h3>
+              @if (r.avgRating > 0) {
+                <span class="rating">★ {{ r.avgRating | number: '1.1-1' }}</span>
+              }
+            </div>
+            <div class="muted small">{{ r.cuisine }} · {{ r.city }}</div>
+            <p class="small clamp">{{ r.description }}</p>
+          </div>
+        </a>
+      }
+    </div>
+
+    @if (res.totalPages > 1) {
+      <div class="pagination">
+        @for (p of pages(); track p) {
+          <button class="btn btn-sm" [class.btn-primary]="p === res.page" [class.btn-outline]="p !== res.page" (click)="go(p)">{{ p + 1 }}</button>
+        }
+      </div>
+    }
+  }
+}

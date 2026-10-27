@@ -1,0 +1,30 @@
+<div class="auth-wrap">
+  <div class="card auth-card">
+    <h1>Welcome back</h1>
+    <p class="muted">Log in to order food or manage your restaurant.</p>
+
+    <div class="field">
+      <label for="email">Email</label>
+      <input id="email" type="email" [(ngModel)]="email" placeholder="you@example.com" (keyup.enter)="submit()">
+    </div>
+    <div class="field">
+      <label for="password">Password</label>
+      <input id="password" type="password" [(ngModel)]="password" placeholder="Your password" (keyup.enter)="submit()">
+    </div>
+
+    <button class="btn btn-primary btn-block" [disabled]="loading()" (click)="submit()">
+      {{ loading() ? 'Logging in...' : 'Log in' }}
+    </button>
+
+    <p class="center small">New here? <a routerLink="/register">Create an account</a></p>
+
+    <div class="demo-box">
+      <div class="small muted">Demo accounts (click to fill):</div>
+      <div class="chips">
+        @for (d of demoAccounts; track d.email) {
+          <button class="chip" (click)="fill(d)">{{ d.label }}</button>
+        }
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,36 @@
+<div class="auth-wrap">
+  <div class="card auth-card">
+    <h1>Create your account</h1>
+    <p class="muted">Order food, run a restaurant or deliver orders.</p>
+
+    <div class="field">
+      <label for="name">Full name</label>
+      <input id="name" [(ngModel)]="name" placeholder="Your name">
+    </div>
+    <div class="field">
+      <label for="email">Email</label>
+      <input id="email" type="email" [(ngModel)]="email" placeholder="you@example.com">
+    </div>
+    <div class="field">
+      <label for="phone">Phone (optional)</label>
+      <input id="phone" [(ngModel)]="phone" placeholder="9876543210">
+    </div>
+    <div class="field">
+      <label for="password">Password</label>
+      <input id="password" type="password" [(ngModel)]="password" placeholder="8+ characters, letters and a digit">
+    </div>
+    <div class="field">
+      <label for="role">I want to</label>
+      <select id="role" [(ngModel)]="role">
+        <option value="CUSTOMER">Order food (Customer)</option>
+        <option value="RESTAURANT_OWNER">Sell food (Restaurant owner)</option>
+        <option value="DELIVERY_PARTNER">Deliver orders (Delivery partner)</option>
+      </select>
+    </div>
+
+    <button class="btn btn-primary btn-block" [disabled]="loading()" (click)="submit()">
+      {{ loading() ? 'Creating account...' : 'Sign up' }}
+    </button>
+    <p class="center small">Already have an account? <a routerLink="/login">Log in</a></p>
+  </div>
+</div>

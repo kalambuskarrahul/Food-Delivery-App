@@ -1,0 +1,41 @@
+<header class="navbar">
+  <div class="navbar-inner">
+    <a class="brand" routerLink="/">🍔 Food<span>Express</span></a>
+
+    <nav class="nav-links">
+      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Restaurants</a>
+
+      @switch (auth.role()) {
+        @case ('CUSTOMER') {
+          <a routerLink="/orders" routerLinkActive="active">My Orders</a>
+          <a routerLink="/cart" routerLinkActive="active" class="cart-link">
+            🛒 Cart
+            @if (cart.count() > 0) {
+              <span class="cart-badge">{{ cart.count() }}</span>
+            }
+          </a>
+        }
+        @case ('RESTAURANT_OWNER') {
+          <a routerLink="/owner/restaurants" routerLinkActive="active">My Restaurants</a>
+          <a routerLink="/owner/orders" routerLinkActive="active">Orders</a>
+        }
+        @case ('DELIVERY_PARTNER') {
+          <a routerLink="/delivery" routerLinkActive="active">Deliveries</a>
+        }
+        @case ('ADMIN') {
+          <a routerLink="/admin" routerLinkActive="active">Admin Dashboard</a>
+        }
+      }
+    </nav>
+
+    <div class="nav-user">
+      @if (auth.user(); as u) {
+        <span class="user-chip">{{ u.name }} <small>{{ u.role.replace('_', ' ') }}</small></span>
+        <button class="btn btn-outline btn-sm" (click)="logout()">Logout</button>
+      } @else {
+        <a class="btn btn-outline btn-sm" routerLink="/login">Login</a>
+        <a class="btn btn-primary btn-sm" routerLink="/register">Sign up</a>
+      }
+    </div>
+  </div>
+</header>

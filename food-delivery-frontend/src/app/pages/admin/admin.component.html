@@ -1,0 +1,99 @@
+<h1>Admin dashboard</h1>
+
+@if (stats(); as s) {
+  <div class="grid grid-4">
+    <div class="card stat"><div class="stat-num">{{ s.totalUsers }}</div><div class="muted">Users</div></div>
+    <div class="card stat"><div class="stat-num">{{ s.totalRestaurants }}</div><div class="muted">Restaurants ({{ s.pendingRestaurants }} pending)</div></div>
+    <div class="card stat"><div class="stat-num">{{ s.totalOrders }}</div><div class="muted">Orders ({{ s.deliveredOrders }} delivered)</div></div>
+    <div class="card stat"><div class="stat-num">{{ s.totalRevenue | currency: 'INR' }}</div><div class="muted">Revenue (delivered)</div></div>
+  </div>
+}
+
+<div class="tabs">
+  <button class="tab" [class.active]="tab() === 'restaurants'" (click)="select('restaurants')">Restaurants</button>
+  <button class="tab" [class.active]="tab() === 'users'" (click)="select('users')">Users</button>
+  <button class="tab" [class.active]="tab() === 'orders'" (click)="select('orders')">Orders</button>
+</div>
+
+@switch (tab()) {
+  @case ('restaurants') {
+    <div class="filters">
+      <select [(ngModel)]="restaurantFilter" (ngModelChange)="loadRestaurants()">
+        <option value="">All restaurants</option>
+        <option value="PENDING">Pending approval</option>
+        <option value="APPROVED">Approved</option>
+        <option value="SUSPENDED">Suspended</option>
+      </select>
+    </div>
+    @if (restaurants().length === 0) {
+      <div class="card empty">No restaurants found.</div>
+    }
+    @for (item of restaurants(); track item.restaurant.id) {
+      <div class="card">
+        <div class="row-between wrap">
+          <div>
+            <h3>{{ item.restaurant.name }} <app-status [value]="item.restaurant.status" /></h3>
+            <div class="muted small">{{ item.restaurant.cuisine }} · {{ item.restaurant.address }}, {{ item.restaurant.city }}</div>
+            <div class="small">Owner: {{ item.ownerName }} ({{ item.ownerEmail }})</div>
+          </div>
+          <div class="actions">
+            @if (item.restaurant.status !== 'APPROVED') {
+              <button class="btn btn-primary btn-sm" (click)="setRestaurantStatus(item, 'APPROVED')">
+                {{ item.restaurant.status === 'PENDING' ? 'Approve' : 'Reinstate' }}
+              </button>
+            }
+            @if (item.restaurant.status !== 'SUSPENDED') {
+              <button class="btn btn-danger btn-sm" (click)="setRestaurantStatus(item, 'SUSPENDED')">Suspend</button>
+            }
+          </div>
+        </div>
+      </div>
+    }
+  }
+  @case ('users') {
+    <div class="card table-wrap">
+      <table>
+        <thead>
+          <tr><th>Name</th><th>Email</th><th>Role</th><th>Joined</th><th>Status</th><th></th></tr>
+        </thead>
+        <tbody>
+          @for (u of users(); track u.id) {
+            <tr>
+              <td>{{ u.name }}</td>
+              <td>{{ u.email }}</td>
+              <td>{{ u.role.replace('_', ' ') }}</td>
+              <td>{{ u.createdAt | date: 'mediumDate' }}</td>
+              <td><span class="badge" [class.b-delivered]="u.enabled" [class.b-cancelled]="!u.enabled">{{ u.enabled ? 'Active' : 'Disabled' }}</span></td>
+              <td>
+                @if (u.id !== auth.user()?.id) {
+                  <button class="btn btn-outline btn-sm" (click)="toggleUser(u)">{{ u.enabled ? 'Disable' : 'Enable' }}</button>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+  @case ('orders') {
+    <div class="filters">
+      <select [(ngModel)]="orderFilter" (ngModelChange)="loadOrders()">
+        <option value="">All orders</option>
+        <option value="PLACED">Placed</option>
+        <option value="ACCEPTED">Accepted</option>
+        <option value="PREPARING">Preparing</option>
+        <option value="READY_FOR_PICKUP">Ready for pickup</option>
+        <option value="OUT_FOR_DELIVERY">Out for delivery</option>
+        <option value="DELIVERED">Delivered</option>
+        <option value="REJECTED">Rejected</option>
+        <option value="CANCELLED">Cancelled</option>
+      </select>
+    </div>
+    @if (orders().length === 0) {
+      <div class="card empty">No orders found.</div>
+    }
+    @for (o of orders(); track o.id) {
+      <app-order-card [order]="o" [showCustomer]="true" />
+    }
+  }
+}

@@ -1,0 +1,15 @@
+target/
+.settings/
+.classpath
+.project
+.sts4-cache/
+*.log
+
+node_modules/
+dist/
+.angular/
+out-tsc/
+
+.vscode/
+.idea/
+Thumbs.db

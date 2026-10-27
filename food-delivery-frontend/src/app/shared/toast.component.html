@@ -1,0 +1,7 @@
+<div class="toast-stack">
+  @for (t of toast.toasts(); track t.id) {
+    <div class="toast" [class.toast-success]="t.type === 'success'" [class.toast-error]="t.type === 'error'" (click)="toast.dismiss(t.id)">
+      {{ t.text }}
+    </div>
+  }
+</div>
